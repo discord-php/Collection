@@ -316,13 +316,43 @@ trait CollectionTrait
      */
     public function find(callable $callback)
     {
-        foreach ($this->items as $item) {
-            if ($callback($item)) {
-                return $item;
-            }
-        }
+        return array_find($this->items, $callback);
+    }
 
-        return null;
+    /**
+     * Finds the key of the first item that matches the callback.
+     *
+     * @param callable $callback
+     *
+     * @return mixed
+     */
+    public function find_key(callable $callback)
+    {
+        return array_find_key($this->items, $callback);
+    }
+
+    /**
+     * Checks if any item matches the callback.
+     *
+     * @param callable $callback
+     *
+     * @return bool
+     */
+    public function any(callable $callback): bool
+    {
+        return array_any($this->items, $callback);
+    }
+
+    /**
+     * Checks if all items match the callback.
+     *
+     * @param callable $callback
+     *
+     * @return bool
+     */
+    public function all(callable $callback): bool
+    {
+        return array_all($this->items, $callback);
     }
 
     /**
