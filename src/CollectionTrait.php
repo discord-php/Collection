@@ -326,6 +326,57 @@ trait CollectionTrait
     }
 
     /**
+     * Finds the key of the first item that matches the callback.
+     *
+     * @param callable $callback
+     *
+     * @return mixed
+     */
+    public function find_key(callable $callback)
+    {
+        foreach ($this->items as $key => $item) {
+            if ($callback($item)) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks if any item matches the callback.
+     *
+     * @param callable $callback
+     *
+     * @return bool
+     */
+    public function any(callable $callback): bool
+    {
+        foreach ($this->items as $item) {
+            if ($callback($item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if all items match the callback.
+     *
+     * @param callable $callback
+     *
+     * @return bool
+     */
+    public function all(callable $callback): bool
+    {
+        foreach ($this->items as $item) {
+            if (! $callback($item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Splices the collection, removing a portion of the items and replacing them with the given replacement.
      *
      * @param int   $offset
