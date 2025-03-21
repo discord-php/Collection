@@ -386,7 +386,7 @@ trait CollectionTrait
      * @param ?int $length
      * @param bool $preserve_keys
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function slice(int $offset, ?int $length = null, bool $preserve_keys = false)
     {
@@ -402,7 +402,7 @@ trait CollectionTrait
      *
      * @param callable|int|null $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function sort(callable|int|null $callback)
     {
@@ -424,7 +424,7 @@ trait CollectionTrait
      * @param CollectionInterface|array $array
      * @param ?callable                 $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function diff($items, ?callable $callback = null)
     {
@@ -448,7 +448,7 @@ trait CollectionTrait
      * @param CollectionInterface|array $array
      * @param ?callable                 $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function intersect($items, ?callable $callback = null)
     {
@@ -469,7 +469,7 @@ trait CollectionTrait
      * @param callable $callback
      * @param mixed    $arg
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function walk(callable $callback, mixed $arg)
     {
@@ -486,7 +486,7 @@ trait CollectionTrait
      * @param callable $callback
      * @param ?mixed   $initial
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function reduce(callable $callback, $initial = null)
     {
@@ -551,7 +551,6 @@ trait CollectionTrait
     {
         return $this->items;
     }
-
     /**
      * Converts the items into a new collection.
      *
