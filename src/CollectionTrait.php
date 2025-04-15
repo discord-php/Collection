@@ -34,7 +34,7 @@ trait CollectionTrait
      * @param ?string     $discrim
      * @param ?string     $class
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public static function from(array $items = [], ?string $discrim = 'id', ?string $class = null)
     {
@@ -47,7 +47,7 @@ trait CollectionTrait
      * @param string  $class
      * @param ?string $discrim
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public static function for(string $class, ?string $discrim = 'id')
     {
@@ -134,7 +134,7 @@ trait CollectionTrait
     /**
      * Fills an array of items into the collection.
      *
-     * @param CollectionInterface|array $items
+     * @param ExCollectionInterface|array $items
      *
      * @return self
      */
@@ -289,7 +289,7 @@ trait CollectionTrait
      *
      * @param callable $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      *
      * @todo This method will be typed to return a CollectionInterface in v11
      */
@@ -421,7 +421,7 @@ trait CollectionTrait
      * If a callback is provided and is callable, it uses `array_udiff_assoc` to compute the difference.
      * Otherwise, it uses `array_diff`.
      *
-     * @param CollectionInterface|array $array
+     * @param ExCollectionInterface|array $array
      * @param ?callable                 $callback
      *
      * @return ExCollectionInterface
@@ -445,7 +445,7 @@ trait CollectionTrait
      * If a callback is provided and is callable, it uses `array_uintersect_assoc` to compute the intersection.
      * Otherwise, it uses `array_intersect`.
      *
-     * @param CollectionInterface|array $array
+     * @param ExCollectionInterface|array $array
      * @param ?callable                 $callback
      *
      * @return ExCollectionInterface
@@ -502,7 +502,7 @@ trait CollectionTrait
      *
      * @param callable $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function map(callable $callback)
     {
@@ -517,7 +517,7 @@ trait CollectionTrait
      *
      * @param int   $flags
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function unique(int $flags = SORT_STRING)
     {
@@ -554,7 +554,7 @@ trait CollectionTrait
     /**
      * Converts the items into a new collection.
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function collect()
     {
@@ -616,6 +616,15 @@ trait CollectionTrait
      */
     public function offsetSet($offset, $value): void
     {
+        // Attempt to use the value's discrim property as the key if offset is null
+        if (empty($offset)) {
+            if (is_array($value) && isset($value[$this->discrim])) {
+                $offset = $value[$this->discrim];
+            } elseif (is_object($value) && property_exists($value, $this->discrim)) {
+                $offset = $value->{$this->discrim};
+            }
+        }
+
         $this->items[$offset] = $value;
     }
 
@@ -665,7 +674,7 @@ trait CollectionTrait
     /**
      * Unserializes the collection.
      *
-     * @param CollectionInterface|array $data
+     * @param ExCollectionInterface|array $data
      */
     public function __unserialize($data): void
     {
