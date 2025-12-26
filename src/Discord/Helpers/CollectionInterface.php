@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is a part of the DiscordPHP project.
  *
@@ -35,7 +37,8 @@ interface CollectionInterface extends ArrayAccess, JsonSerializable, IteratorAgg
     public function clear(): void;
     public function map(callable $callback);
     public function merge($collection): self;
-    public function toArray();
+    /** @deprecated 10.42.0 Use `jsonSerialize` */
+    public function toArray(bool $assoc = true): array;
     public function offsetExists($offset): bool;
     #[\ReturnTypeWillChange]
     public function offsetGet($offset);
@@ -45,7 +48,7 @@ interface CollectionInterface extends ArrayAccess, JsonSerializable, IteratorAgg
     public function __serialize(): array;
     public function unserialize(string $serialized): void;
     public function __unserialize($data): void;
-    public function jsonSerialize(): array;
+    public function jsonSerialize(bool $assoc = true): array;
     public function getIterator(): Traversable;
     public function __debugInfo(): array;
 }
