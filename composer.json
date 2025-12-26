@@ -19,9 +19,6 @@
     "require-dev": {
         "team-reflex/discord-php": "dev-master"
     },
-    "require-dev": {
-        "team-reflex/discord-php": "dev-master"
-    },
     "autoload": {
         "psr-4": {
             "Discord\\": "src/Discord/"
