@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is a part of the DiscordPHP project.
  *
@@ -11,14 +13,17 @@
 
 namespace Discord\Helpers;
 
+use JsonSerializable;
+
 /**
  * Collection of items. Inspired by Laravel Collections.
  *
  * @since 5.0.0 No longer extends Laravel's BaseCollection
  * @since 4.0.0
  */
-class Collection implements CollectionInterface
+class Collection implements ExCollectionInterface, JsonSerializable
 {
+    use CollectionTrait;
     /**
      * The collection discriminator.
      *
@@ -40,5 +45,46 @@ class Collection implements CollectionInterface
      */
     protected $class;
 
-    use CollectionTrait;
+    /**
+     * Create a new Collection.
+     *
+     * @param array   $items
+     * @param ?string $discrim
+     * @param ?string $class
+     */
+    public function __construct(array $items = [], ?string $discrim = 'id', ?string $class = null)
+    {
+        $this->items = $items;
+        $this->discrim = $discrim;
+        $this->class = $class;
+    }
+
+    /**
+     * Creates a collection from an array.
+     *
+     * @param array   $items
+     * @param ?string $discrim
+     * @param ?string $class
+     *
+     * @return ExCollectionInterface
+     */
+    public static function from(array $items = [], ?string $discrim = 'id', ?string $class = null)
+    {
+        return new Collection($items, $discrim, $class);
+    }
+
+    /**
+     * Creates a collection for a class.
+     *
+     * @param string  $class
+     * @param ?string $discrim
+     *
+     * @return ExCollectionInterface
+     */
+    public static function for(string $class, ?string $discrim = 'id')
+    {
+        $items = [];
+
+        return new Collection($items, $discrim, $class);
+    }
 }
