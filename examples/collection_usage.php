@@ -40,7 +40,7 @@ echo "Find name Alice: "; var_dump($found); // => null (Alice was shifted/pulled
 
 // Map returns new Collection
 $names = $col->map(function ($it) { return is_array($it) ? $it['name'] : $it->name; });
-echo "Mapped names (as array): "; var_dump($names->toArray()); // => array containing remaining names (e.g., Carol)
+echo "Mapped names (as array): "; var_dump($names->jsonSerialize()); // => array containing remaining names (e.g., Carol)
 
 // Demonstrate class restriction
 class ExampleItem { public $id; public $name; public function __construct($id, $name) { $this->id = $id; $this->name = $name; } }
@@ -48,10 +48,10 @@ $sc = Collection::for(ExampleItem::class);
 $sc->push(new ExampleItem(1, 'X'), new ExampleItem(2, 'Y'));
 // Attempt to push an array (will be ignored due to class restriction)
 $sc->push(['id' => 3, 'name' => 'Z']);
-echo "Class-restricted collection toArray: "; var_dump($sc->toArray()); // => array with ExampleItem objects for ids 1 and 2
+echo "Class-restricted collection jsonSerialize: "; var_dump($sc->jsonSerialize()); // => array with ExampleItem objects for ids 1 and 2
 
-// jsonSerialize / toArray
-echo "JSON serializable: "; var_dump($sc->jsonSerialize()); // => same structure as toArray
+// jsonSerialize / jsonSerialize
+echo "JSON serializable: "; var_dump($sc->jsonSerialize()); // => same structure as jsonSerialize
 
 // ArrayAccess: set/get/isset/unset
 $sc->set(5, new ExampleItem(5, 'E'));
@@ -68,26 +68,26 @@ echo "Values after merge: "; var_dump($sc->values()); // => ExampleItem objects 
 
 // Unique, diff, intersect examples (using simple values)
 $u = new Collection([1, 2, 2, 3], null, null); // discrim null keeps numeric insertion
-echo "Unique values: "; var_dump($u->unique()->toArray()); // => array(1,2,3)
+echo "Unique values: "; var_dump($u->unique()->jsonSerialize()); // => array(1,2,3)
 
 // Fill and clear
 $u->clear();
 $u->fill([['id' => 1, 'name' => 'A'], ['id' => 2, 'name' => 'B']]);
-echo "Filled: "; var_dump($u->toArray()); // => arrays for A and B
+echo "Filled: "; var_dump($u->jsonSerialize()); // => arrays for A and B
 
 // Walk and reduce (accumulate into an array so Collection::__construct() receives an array)
 $reduced = $u->reduce(function ($carry, $item) {
 	$carry[] = is_array($item) ? $item['name'] : $item->name;
 	return $carry;
 }, []);
-echo "Reduced names array: "; var_dump($reduced->toArray()); // => array("A","B")
+echo "Reduced names array: "; var_dump($reduced->jsonSerialize()); // => array("A","B")
 
 // Serialize / unserialize
 // Serialize / unserialize
 $s = $u->serialize();
 $u2 = new Collection();
 $u2->unserialize($s);
-echo "Unserialized: "; var_dump($u2->toArray()); // => collection reconstructed from serialized JSON
+echo "Unserialized: "; var_dump($u2->jsonSerialize()); // => collection reconstructed from serialized JSON
 
 // __debugInfo
 echo "Debug info: "; var_dump($u2->__debugInfo()); // => same as unserialized output
@@ -95,7 +95,7 @@ echo "Debug info: "; var_dump($u2->__debugInfo()); // => same as unserialized ou
 // Additional utilities: find_key, any, all, splice, slice, sort, diff, intersect
 $c2 = new Collection([['id' => 1, 'v' => 3], ['id' => 2, 'v' => 1]], 'id');
 $sorted = $c2->sort(function ($a, $b) { return ($a['v'] <=> $b['v']); });
-echo "Sorted collection: "; var_dump($sorted->toArray()); // => ordered by 'v' ascending
+echo "Sorted collection: "; var_dump($sorted->jsonSerialize()); // => ordered by 'v' ascending
 
 // find_key returns the key of the first matching element
 $keyOfLow = $c2->find_key(function ($it) { return $it['v'] === 1; });
@@ -106,15 +106,15 @@ echo "All have v>0?: "; var_dump($c2->all(function ($it) { return $it['v'] > 0; 
 
 // splice mutates the collection in place
 $spliced = $c2->splice(0, 1, [['id' => 3, 'v' => 0]]);
-echo "After splice (mutated c2): "; var_dump($c2->toArray()); // => id 3 now at index 0
+echo "After splice (mutated c2): "; var_dump($c2->jsonSerialize()); // => id 3 now at index 0
 
 $sliced = $c2->slice(0, 1);
-echo "Sliced (new collection): "; var_dump($sliced->toArray()); // => new collection with the first element
+echo "Sliced (new collection): "; var_dump($sliced->jsonSerialize()); // => new collection with the first element
 
 // diff/intersect
 $a = new Collection([1, 2, 3], null);
 $b = new Collection([2, 3, 4], null);
-echo "Diff a-b: "; var_dump($a->diff($b)->toArray()); // => array(1)
-echo "Intersect a-b: "; var_dump($a->intersect($b)->toArray()); // => array(2,3)
+echo "Diff a-b: "; var_dump($a->diff($b)->jsonSerialize()); // => array(1)
+echo "Intersect a-b: "; var_dump($a->intersect($b)->jsonSerialize()); // => array(2,3)
 
 echo "Done.\n";
