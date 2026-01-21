@@ -82,7 +82,6 @@ $reduced = $u->reduce(fn($carry, $item) => [...$carry, (is_array($item) ? $item[
 echo "Reduced names array: "; var_dump($reduced->jsonSerialize()); // => array("A","B")
 
 // Serialize / unserialize
-// Serialize / unserialize
 $s = $u->serialize();
 $u2 = new Collection();
 $u2->unserialize($s);
