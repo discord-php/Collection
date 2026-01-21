@@ -50,7 +50,7 @@ $sc->push(new ExampleItem(1, 'X'), new ExampleItem(2, 'Y'));
 $sc->push(['id' => 3, 'name' => 'Z']);
 echo "Class-restricted collection jsonSerialize: "; var_dump($sc->jsonSerialize()); // => array with ExampleItem objects for ids 1 and 2
 
-// jsonSerialize / jsonSerialize
+// jsonSerialize / toArray
 echo "JSON serializable: "; var_dump($sc->jsonSerialize()); // => same structure as jsonSerialize
 
 // ArrayAccess: set/get/isset/unset
