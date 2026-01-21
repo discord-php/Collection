@@ -76,10 +76,8 @@ $u->fill([['id' => 1, 'name' => 'A'], ['id' => 2, 'name' => 'B']]);
 echo "Filled: "; var_dump($u->jsonSerialize()); // => arrays for A and B
 
 // Walk and reduce (accumulate into an array so Collection::__construct() receives an array)
-$reduced = $u->reduce(function ($carry, $item) {
-	$carry[] = is_array($item) ? $item['name'] : $item->name;
-	return $carry;
-}, []);
+// Use an arrow function with a ternary and array unpacking to return the new carry
+$reduced = $u->reduce(fn($carry, $item) => [...$carry, (is_array($item) ? $item['name'] : $item->name)], []);
 echo "Reduced names array: "; var_dump($reduced->jsonSerialize()); // => array("A","B")
 
 // Serialize / unserialize
