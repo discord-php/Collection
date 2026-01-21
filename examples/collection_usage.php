@@ -35,11 +35,11 @@ echo "Shifted: "; var_dump($shifted); // => array with the first key=>value pair
 $foundKey = $col->search($obj, true);
 echo "Search strict for object: "; var_dump($foundKey); // => int(0) (index of the object)
 
-$found = $col->find(function ($it) { return (is_array($it) ? $it['name'] : $it->name) === 'Alice'; });
+$found = $col->find(fn ($it) => (is_array($it) ? $it['name'] : $it->name) === 'Alice');
 echo "Find name Alice: "; var_dump($found); // => null (Alice was shifted/pulled earlier)
 
 // Map returns new Collection
-$names = $col->map(function ($it) { return is_array($it) ? $it['name'] : $it->name; });
+$names = $col->map(fn ($it) => is_array($it) ? $it['name'] : $it->name);
 echo "Mapped names (as array): "; var_dump($names->jsonSerialize()); // => array containing remaining names (e.g., Carol)
 
 // Demonstrate class restriction
@@ -94,15 +94,15 @@ echo "Debug info: "; var_dump($u2->__debugInfo()); // => same as unserialized ou
 
 // Additional utilities: find_key, any, all, splice, slice, sort, diff, intersect
 $c2 = new Collection([['id' => 1, 'v' => 3], ['id' => 2, 'v' => 1]], 'id');
-$sorted = $c2->sort(function ($a, $b) { return ($a['v'] <=> $b['v']); });
+$sorted = $c2->sort(fn ($a, $b) => ($a['v'] <=> $b['v']));
 echo "Sorted collection: "; var_dump($sorted->jsonSerialize()); // => ordered by 'v' ascending
 
 // find_key returns the key of the first matching element
-$keyOfLow = $c2->find_key(function ($it) { return $it['v'] === 1; });
+$keyOfLow = $c2->find_key(fn ($it) => $it['v'] === 1);
 echo "Key of v===1: "; var_dump($keyOfLow); // => int(1)
 
-echo "Any v>2?: "; var_dump($c2->any(function ($it) { return $it['v'] > 2; })); // => bool(true)
-echo "All have v>0?: "; var_dump($c2->all(function ($it) { return $it['v'] > 0; })); // => bool(true)
+echo "Any v>2?: "; var_dump($c2->any(fn ($it) => $it['v'] > 2)); // => bool(true)
+echo "All have v>0?: "; var_dump($c2->all(fn ($it) => $it['v'] > 0)); // => bool(true)
 
 // splice mutates the collection in place
 $spliced = $c2->splice(0, 1, [['id' => 3, 'v' => 0]]);
