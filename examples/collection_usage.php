@@ -4,7 +4,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Discord\Helpers\Collection;
 
-echo "Collection Usage Examples\\n\\n";
+echo "Collection Usage Examples" . PHP_EOL . PHP_EOL;
 
 // Basic construction and pushing arrays
 $col = new Collection(); // default discrim 'id'
@@ -117,4 +117,4 @@ $b = new Collection([2, 3, 4], null);
 echo "Diff a-b: "; var_dump($a->diff($b)->jsonSerialize()); // => array(1)
 echo "Intersect a-b: "; var_dump($a->intersect($b)->jsonSerialize()); // => array(2,3)
 
-echo "Done.\n";
+echo "Done." . PHP_EOL;
