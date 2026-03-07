@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is a part of the DiscordPHP project.
  *
@@ -13,46 +15,6 @@ namespace Discord\Helpers;
 
 trait CollectionTrait
 {
-    /**
-     * Create a new Collection.
-     *
-     * @param array       $items
-     * @param ?string     $discrim
-     * @param ?string     $class
-     */
-    public function __construct(array $items = [], ?string $discrim = 'id', ?string $class = null)
-    {
-        $this->items = $items;
-        $this->discrim = $discrim;
-        $this->class = $class;
-    }
-
-    /**
-     * Creates a collection from an array.
-     *
-     * @param array       $items
-     * @param ?string     $discrim
-     * @param ?string     $class
-     *
-     * @return CollectionInterface
-     */
-    public static function from(array $items = [], ?string $discrim = 'id', ?string $class = null)
-    {
-        return new Collection($items, $discrim, $class);
-    }
-
-    /**
-     * Creates a collection for a class.
-     *
-     * @param string  $class
-     * @param ?string $discrim
-     *
-     * @return CollectionInterface
-     */
-    public static function for(string $class, ?string $discrim = 'id')
-    {
-        return new Collection([], $discrim, $class);
-    }
 
     /**
      * Gets an item from the collection.
@@ -64,14 +26,14 @@ trait CollectionTrait
      */
     public function get(string $discrim, $key)
     {
-        if ($discrim == $this->discrim && isset($this->items[$key])) {
+        if ($discrim === $this->discrim && isset($this->items[$key])) {
             return $this->items[$key];
         }
 
         foreach ($this->items as $item) {
-            if (is_array($item) && isset($item[$discrim]) && $item[$discrim] == $key) {
+            if (is_array($item) && isset($item[$discrim]) && $item[$discrim] === $key) {
                 return $item;
-            } elseif (is_object($item) && $item->{$discrim} == $key) {
+            } elseif (is_object($item) && $item->{$discrim} === $key) {
                 return $item;
             }
         }
@@ -134,14 +96,14 @@ trait CollectionTrait
     /**
      * Fills an array of items into the collection.
      *
-     * @param CollectionInterface|array $items
+     * @param ExCollectionInterface|array $items
      *
      * @return self
      */
     public function fill($items): self
     {
         $items = $items instanceof CollectionInterface
-            ? $items->toArray()
+            ? $items->jsonSerialize()
             : $items;
         if (! is_array($items)) {
             throw new \InvalidArgumentException('The fill method only accepts arrays or CollectionInterface instances.');
@@ -289,7 +251,7 @@ trait CollectionTrait
      *
      * @param callable $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      *
      * @todo This method will be typed to return a CollectionInterface in v11
      */
@@ -386,7 +348,7 @@ trait CollectionTrait
      * @param ?int $length
      * @param bool $preserve_keys
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function slice(int $offset, ?int $length = null, bool $preserve_keys = false)
     {
@@ -402,7 +364,7 @@ trait CollectionTrait
      *
      * @param callable|int|null $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function sort(callable|int|null $callback)
     {
@@ -424,12 +386,12 @@ trait CollectionTrait
      * @param CollectionInterface|array $array
      * @param ?callable                 $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function diff($items, ?callable $callback = null)
     {
         $items = $items instanceof CollectionInterface
-            ? $items->toArray()
+            ? $items->jsonSerialize()
             : $items;
 
         $diff = $callback && is_callable($callback)
@@ -448,12 +410,12 @@ trait CollectionTrait
      * @param CollectionInterface|array $array
      * @param ?callable                 $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function intersect($items, ?callable $callback = null)
     {
         $items = $items instanceof CollectionInterface
-            ? $items->toArray()
+            ? $items->jsonSerialize()
             : $items;
 
         $diff = $callback && is_callable($callback)
@@ -469,9 +431,9 @@ trait CollectionTrait
      * @param callable $callback
      * @param mixed    $arg
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
-    public function walk(callable $callback, mixed $arg)
+    public function walk(callable $callback, mixed $arg = null)
     {
         $items = $this->items;
 
@@ -486,7 +448,7 @@ trait CollectionTrait
      * @param callable $callback
      * @param ?mixed   $initial
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function reduce(callable $callback, $initial = null)
     {
@@ -502,7 +464,7 @@ trait CollectionTrait
      *
      * @param callable $callback
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function map(callable $callback)
     {
@@ -515,9 +477,9 @@ trait CollectionTrait
     /**
      * Returns unique items.
      *
-     * @param int   $flags
+     * @param int $flags
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function unique(int $flags = SORT_STRING)
     {
@@ -534,7 +496,7 @@ trait CollectionTrait
     public function merge($collection): self
     {
         $items = $collection instanceof CollectionInterface
-            ? $collection->toArray()
+            ? $collection->jsonSerialize()
             : $collection;
 
         $this->items = array_merge($this->items, $items);
@@ -545,17 +507,20 @@ trait CollectionTrait
     /**
      * Converts the collection to an array.
      *
+     * @param bool $assoc Whether to map keys to values.
+     *
+     * @deprecated 10.42.0 Use `jsonSerialize`
+     *
      * @return array
      */
-    public function toArray()
+    public function toArray(bool $assoc = true): array
     {
-        return $this->items;
+        return $this->jsonSerialize($assoc);
     }
-
     /**
      * Converts the items into a new collection.
      *
-     * @return CollectionInterface
+     * @return ExCollectionInterface
      */
     public function collect()
     {
@@ -563,9 +528,9 @@ trait CollectionTrait
     }
 
     /**
-     * @since 11.0.0
-     *
      * Get the keys of the items.
+     *
+     * @since 10.2.0
      *
      * @return int[]|string[]
      */
@@ -617,6 +582,15 @@ trait CollectionTrait
      */
     public function offsetSet($offset, $value): void
     {
+        // Attempt to use the value's discrim property as the key if offset is null
+        if (empty($offset)) {
+            if (is_array($value) && isset($value[$this->discrim])) {
+                $offset = $value[$this->discrim];
+            } elseif (is_object($value) && property_exists($value, $this->discrim)) {
+                $offset = $value->{$this->discrim};
+            }
+        }
+
         $this->items[$offset] = $value;
     }
 
@@ -666,12 +640,12 @@ trait CollectionTrait
     /**
      * Unserializes the collection.
      *
-     * @param CollectionInterface|array $data
+     * @param ExCollectionInterface|array $data
      */
     public function __unserialize($data): void
     {
         if ($data instanceof CollectionInterface) {
-            $data = $data->toArray();
+            $data = $data->jsonSerialize();
         }
         if (! is_array($data)) {
             throw new \InvalidArgumentException('The __unserialize method only accepts arrays or CollectionInterface instances.');
@@ -683,11 +657,15 @@ trait CollectionTrait
     /**
      * Serializes the object to a value that can be serialized natively by json_encode().
      *
+     * @param bool $assoc Whether to map keys to values.
+     *
      * @return array
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(bool $assoc = true): array
     {
-        return $this->items;
+        return $assoc
+            ? $this->items
+            : array_values($this->items);
     }
 
     /**

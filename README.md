@@ -10,6 +10,10 @@ You can install the library via Composer:
 composer require discord-php-helpers/collection
 ```
 
+## Guide
+
+https://discord-php.github.io/DiscordPHP/guide/collection.html#collection
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
