@@ -26,14 +26,14 @@ interface ExCollectionInterface extends CollectionInterface
     /** @return ExCollectionInterface */
     public function slice(int $offset, ?int $length = null, bool $preserve_keys = false);
     /** @return ExCollectionInterface */
-    public function sort(callable|int|null $callback);
+    public function sort(callable|int|null $callback = null);
     /** @return ExCollectionInterface */
     public function diff($items, ?callable $callback = null);
     /** @return ExCollectionInterface */
     public function intersect($items, ?callable $callback = null);
     /** @return ExCollectionInterface */
     public function walk(callable $callback, mixed $arg = null);
-    /** @return ExCollectionInterface */
+    /** @return mixed The final value of `$carry`. */
     public function reduce(callable $callback, $initial = null);
     /** @return ExCollectionInterface */
     public function unique(int $flags = SORT_STRING);
