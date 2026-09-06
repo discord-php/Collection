@@ -13,9 +13,17 @@ declare(strict_types=1);
 
 namespace Discord\Helpers;
 
+/**
+ * Provides the shared implementation for {@see CollectionInterface} /
+ * {@see ExCollectionInterface}. The consuming class must declare the three
+ * properties below.
+ *
+ * @property ?string $discrim The key used to index items (`null` = plain list).
+ * @property array   $items   The items contained in the collection.
+ * @property ?string $class   Class every item must be an instance of, or `null`.
+ */
 trait CollectionTrait
 {
-
     /**
      * Gets an item from the collection.
      *
@@ -33,7 +41,7 @@ trait CollectionTrait
         foreach ($this->items as $item) {
             if (is_array($item) && isset($item[$discrim]) && $item[$discrim] === $key) {
                 return $item;
-            } elseif (is_object($item) && $item->{$discrim} === $key) {
+            } elseif (is_object($item) && isset($item->{$discrim}) && $item->{$discrim} === $key) {
                 return $item;
             }
         }
@@ -152,10 +160,18 @@ trait CollectionTrait
         }
 
         if (is_array($item)) {
-            $this->items[$item[$this->discrim]] = $item;
+            $key = $item[$this->discrim] ?? null;
         } elseif (is_object($item)) {
-            $this->items[$item->{$this->discrim}] = $item;
+            $key = $item->{$this->discrim} ?? null;
+        } else {
+            return $this;
         }
+
+        // Append when the item carries no discriminator value, rather than
+        // keying it on `null` (an E_DEPRECATED on PHP >= 8.5).
+        $key === null
+            ? $this->items[] = $item
+            : $this->items[$key] = $item;
 
         return $this;
     }
@@ -191,15 +207,9 @@ trait CollectionTrait
      */
     public function last()
     {
-        $last = end($this->items);
+        $key = array_key_last($this->items);
 
-        if ($last !== false) {
-            reset($this->items);
-
-            return $last;
-        }
-
-        return null;
+        return $key === null ? null : $this->items[$key];
     }
 
     /**
@@ -360,17 +370,18 @@ trait CollectionTrait
     }
 
     /**
-     * Sort through each item with a callback.
+     * Sort through each item with a callback, a `SORT_*` flag, or `null` for a
+     * default ascending value sort.
      *
      * @param callable|int|null $callback
      *
      * @return ExCollectionInterface
      */
-    public function sort(callable|int|null $callback)
+    public function sort(callable|int|null $callback = null)
     {
         $items = $this->items;
 
-        $callback && is_callable($callback)
+        is_callable($callback)
             ? uasort($items, $callback)
             : asort($items, $callback ?? SORT_REGULAR);
 
@@ -381,9 +392,10 @@ trait CollectionTrait
      * Gets the difference between the items.
      *
      * If a callback is provided and is callable, it uses `array_udiff_assoc` to compute the difference.
-     * Otherwise, it uses `array_diff`.
+     * Otherwise, it uses `array_diff` (which compares elements as strings — pass a
+     * callback for collections of objects).
      *
-     * @param CollectionInterface|array $array
+     * @param CollectionInterface|array $items
      * @param ?callable                 $callback
      *
      * @return ExCollectionInterface
@@ -405,9 +417,10 @@ trait CollectionTrait
      * Gets the intersection of the items.
      *
      * If a callback is provided and is callable, it uses `array_uintersect_assoc` to compute the intersection.
-     * Otherwise, it uses `array_intersect`.
+     * Otherwise, it uses `array_intersect` (which compares elements as strings — pass
+     * a callback for collections of objects).
      *
-     * @param CollectionInterface|array $array
+     * @param CollectionInterface|array $items
      * @param ?callable                 $callback
      *
      * @return ExCollectionInterface
@@ -445,18 +458,14 @@ trait CollectionTrait
     /**
      * Reduces the collection to a single value using a callback function.
      *
-     * @param callable $callback
-     * @param ?mixed   $initial
+     * @param callable $callback `fn ($carry, $item) => $carry`
+     * @param mixed    $initial
      *
-     * @return ExCollectionInterface
+     * @return mixed The final value of `$carry`.
      */
     public function reduce(callable $callback, $initial = null)
     {
-        $items = $this->items;
-
-        $items = array_reduce($items, $callback, $initial);
-
-        return new Collection($items, $this->discrim, $this->class);
+        return array_reduce($this->items, $callback, $initial);
     }
 
     /**
@@ -489,7 +498,7 @@ trait CollectionTrait
     /**
      * Merges another collection into this collection.
      *
-     * @param $collection
+     * @param ExCollectionInterface|array $collection
      *
      * @return self
      */
@@ -498,6 +507,10 @@ trait CollectionTrait
         $items = $collection instanceof CollectionInterface
             ? $collection->jsonSerialize()
             : $collection;
+
+        if (! is_array($items)) {
+            throw new \InvalidArgumentException('The merge method only accepts arrays or CollectionInterface instances.');
+        }
 
         $this->items = array_merge($this->items, $items);
 
@@ -517,6 +530,7 @@ trait CollectionTrait
     {
         return $this->jsonSerialize($assoc);
     }
+
     /**
      * Converts the items into a new collection.
      *
@@ -582,16 +596,20 @@ trait CollectionTrait
      */
     public function offsetSet($offset, $value): void
     {
-        // Attempt to use the value's discrim property as the key if offset is null
-        if (empty($offset)) {
+        // Derive the key from the value's discriminator only when no explicit
+        // offset was given (`$c[] = $value`). `empty()` would also hijack a
+        // deliberate `$c[0] = $value` and mis-key it on `null`/`''`.
+        if ($offset === null && $this->discrim !== null) {
             if (is_array($value) && isset($value[$this->discrim])) {
                 $offset = $value[$this->discrim];
-            } elseif (is_object($value) && property_exists($value, $this->discrim)) {
+            } elseif (is_object($value) && isset($value->{$this->discrim})) {
                 $offset = $value->{$this->discrim};
             }
         }
 
-        $this->items[$offset] = $value;
+        $offset === null
+            ? $this->items[] = $value
+            : $this->items[$offset] = $value;
     }
 
     /**
@@ -630,11 +648,11 @@ trait CollectionTrait
     /**
      * Unserializes the collection.
      *
-     * @param string $serialized
+     * @param string $serialized A string produced by {@see serialize()}.
      */
     public function unserialize(string $serialized): void
     {
-        $this->items = json_decode($serialized);
+        $this->items = json_decode($serialized, true);
     }
 
     /**

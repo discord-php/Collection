@@ -60,7 +60,7 @@ Mapped names (as array): array(1) {
   [0]=>
   string(5) "Carol"
 }
-Class-restricted collection toArray: array(2) {
+Class-restricted collection jsonSerialize: array(2) {
   [1]=>
   object(ExampleItem)#7 (2) {
     ["id"]=>
@@ -150,22 +150,17 @@ Filled: array(2) {
     string(1) "B"
   }
 }
-Reduced names array: array(2) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(1) "B"
-}
+Reduced names: string(2) "AB"
 Unserialized: array(2) {
   [0]=>
-  object(stdClass)#13 (2) {
+  array(2) {
     ["id"]=>
     int(1)
     ["name"]=>
     string(1) "A"
   }
   [1]=>
-  object(stdClass)#14 (2) {
+  array(2) {
     ["id"]=>
     int(2)
     ["name"]=>
@@ -174,14 +169,14 @@ Unserialized: array(2) {
 }
 Debug info: array(2) {
   [0]=>
-  object(stdClass)#13 (2) {
+  array(2) {
     ["id"]=>
     int(1)
     ["name"]=>
     string(1) "A"
   }
   [1]=>
-  object(stdClass)#14 (2) {
+  array(2) {
     ["id"]=>
     int(2)
     ["name"]=>
