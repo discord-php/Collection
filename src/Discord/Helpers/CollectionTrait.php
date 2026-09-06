@@ -169,9 +169,11 @@ trait CollectionTrait
 
         // Append when the item carries no discriminator value, rather than
         // keying it on `null` (an E_DEPRECATED on PHP >= 8.5).
-        $key === null
-            ? $this->items[] = $item
-            : $this->items[$key] = $item;
+        if ($key === null) {
+            $this->items[] = $item;
+        } else {
+            $this->items[$key] = $item;
+        }
 
         return $this;
     }
@@ -607,9 +609,11 @@ trait CollectionTrait
             }
         }
 
-        $offset === null
-            ? $this->items[] = $value
-            : $this->items[$offset] = $value;
+        if ($offset === null) {
+            $this->items[] = $value;
+        } else {
+            $this->items[$offset] = $value;
+        }
     }
 
     /**
