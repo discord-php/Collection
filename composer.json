@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "php": "8.0.*"
+        "php": ">=8.0"
     },
     "require-dev": {
         "team-reflex/discord-php": "dev-master"
